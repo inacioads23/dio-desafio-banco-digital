@@ -12,5 +12,6 @@ public interface IConta {
 	void transferir(double valor, Conta contaDestino);
 	
 	void imprimirExtrato(); // implementado nas contas individuais, pois eu havia transformado a Class Conta em abstract
+
 	
 }
