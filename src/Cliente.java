@@ -8,7 +8,12 @@ public class Cliente {
 	}
 
 	public void setNome(String nome) {
-		this.nome = nome;
-	}
+        if (!nome.matches("[a-zA-ZáéíóúãõâêîôûçÁÉÍÓÚÃÕÂÊÎÔÛÇ ]+")) {
+            System.out.println("Nome inválido. Apenas letras são permitidas.");
+            this.nome = "";
+        } else {
+            this.nome = nome;
+        }
+    }
 
 }
