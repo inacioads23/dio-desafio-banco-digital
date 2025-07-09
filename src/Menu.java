@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class Menu {
 
-	public void menuPrinciapl() {
+	public void menuPrincipal() {
 		Scanner ler = new Scanner(System.in);
 		int opc = 0;
 		int tipoConta;
@@ -46,23 +46,18 @@ public class Menu {
 
 					System.out.print("Digite o valor de Depósito: R$ ");
 					double dep = ler.nextDouble();
-
-					System.out.print("Conta para Depósito: 1- Conta Corrente; 2- Poupanca: ");
+					
+					System.out.print("Conta para Depósito: 1- Conta Corrente; 2- Conta Poupança: ");
 					tipoConta = ler.nextInt();
 
 					if (tipoConta == 1) {
 						cc.depositar(dep);
-						System.out.println("\nDepósito em Conta Corrente realizado com sucesso");
-						line();
 					} else if (tipoConta == 2) {
 						poupanca.depositar(dep);
-						System.out.println("\nDepósito em Conta Poupança realizado com sucesso");
-						line();
 					} else {
-						System.out.println("\nOpção inválida");
-						line();
+						System.out.println("Opção inválida");
 					}
-					break;
+					break;					
 
 				case 3:
 					System.out.println("\n---------------------------> SAQUE <---------------------------");
@@ -73,17 +68,13 @@ public class Menu {
 					System.out.print("Digite o valor do saque: R$ ");
 					double saq = ler.nextDouble();
 
-					System.out.print("Conta para Saque: 1- Conta Corrente; 2- Poupanca: ");
+					System.out.print("Conta para Saque: 1- Conta Corrente; 2- Conta Poupança: ");
 					tipoConta = ler.nextInt();
 
 					if (tipoConta == 1) {
 						cc.sacar(saq);
-						System.out.println("\nSaque da Conta Corrente realizado com sucesso");
-						line();
 					} else if (tipoConta == 2) {
 						poupanca.sacar(saq);
-						System.out.println("\nSaque da Conta Poupança realizado com sucesso");
-						line();
 					} else {
 						System.out.println("Opção inválida");
 					}
@@ -97,21 +88,16 @@ public class Menu {
 
 					System.out.print("Digite o valor da transferencia: R$ ");
 					double transf = ler.nextDouble();
-
-					System.out.print("Conta para Transferência: 1- Conta Corrente; 2- Poupanca: ");
+					
+					System.out.print("Conta de Transferência: 1- Conta Corrente; 2- Conta Poupança: ");
 					tipoConta = ler.nextInt();
 
 					if (tipoConta == 1) {
-						poupanca.transferir(transf, cc);
-						System.out.println("\nTransferência para Conta Corrente realizada com sucesso");
-						line();
-					} else if (tipoConta == 2) {
 						cc.transferir(transf, poupanca);
-						System.out.println("\nTransferência para Conta Poupança realizada com sucesso");
-						line();
+					} else if (tipoConta == 2) {
+						poupanca.transferir(transf, cc);
 					} else {
 						System.out.println("Opção inválida");
-						line();
 					}
 					break;
 
@@ -152,22 +138,26 @@ public class Menu {
 				default:
 					System.out.println("Opção inválida.");
 				}
-			} catch (InputMismatchException e) {
+
+			} catch (
+
+			InputMismatchException e) {
 				System.out.println("Erro: entrada inválida. Digite apenas números.");
 				ler.nextLine(); // limpar buffer
 			} catch (InterruptedException e) {
-				System.out.println("Pausa interrompida."); // Thread.sleep
+				System.out.println("Pausa interrompida.");
 			}
 
 			System.out.println("");
 
 		} while (opc != 6);
+
+		ler.close();
 	}
 
-	private boolean clienteValido(Cliente cliente) {
-		if (cliente == null || cliente.getNome() == null || cliente.getNome().isBlank()) {
+	private boolean clienteValido(Cliente client) {
+		if (client == null || client.getNome() == null || client.getNome().isBlank()) {
 			System.out.println("Crie uma conta primeiro!");
-			line();
 			return false;
 		}
 		return true;

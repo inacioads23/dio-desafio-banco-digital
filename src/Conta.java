@@ -34,9 +34,11 @@ public abstract class Conta implements IConta {
 	@Override
 	public void sacar(double valor) {
 		if (saldo <= 0) {
-			System.out.println("Sem saldo disponível para saque\n");
+			System.out.println("\nSem saldo disponível para saque");
+			line();
 		} else if (saldo < valor) {
 			System.out.println("\nValor solicitado acima do saldo em conta");
+			line();
 		} else {
 			saldo = saldo - valor;
 			// saldo -= valor // outra opção
@@ -46,7 +48,8 @@ public abstract class Conta implements IConta {
 	@Override
 	public void depositar(double valor) {
 		if (cliente.getNome().isEmpty()) {
-			System.out.println("Conta não existe! Primeiro crie a conta!");
+			System.out.println("\nConta não existe! Primeiro crie a conta!");
+			line();
 		} else {
 			saldo = saldo + valor;
 			// saldo += valor // outra opção
@@ -56,9 +59,11 @@ public abstract class Conta implements IConta {
 	@Override
 	public void transferir(double valor, Conta contaDestino) {
 		if (saldo <= 0) {
-			System.out.println("Sem saldo disponível para transferência\n");
+			System.out.println("\nSem saldo disponível para transferência");
+			line();
 		} else if (saldo < valor) {
 			System.out.println("\nValor solicitado acima do saldo em conta");
+			line();
 		} else {
 			this.sacar(valor); // sacar da conta atual ('this')
 			contaDestino.depositar(valor);
@@ -72,6 +77,8 @@ public abstract class Conta implements IConta {
 		System.out.println(String.format("Numero Conta: %d", this.numero));
 		System.out.println(String.format("Saldo: R$ %.2f%n", this.saldo));
 	}
-	
-	
+
+	private void line() {
+		System.out.println("---------------------------------------------------------------");
+	}
 }
