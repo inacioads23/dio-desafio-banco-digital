@@ -1,170 +1,319 @@
-
-import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
-public class Menu {
+public class MenuOpcoes {
 
-	public void menuPrincipal() {
-		Scanner ler = new Scanner(System.in);
-		int opc = 0;
-		int tipoConta;
+	private Banco banco = new Banco("Banco Teste");
 
-		Cliente client = null;
-		Conta cc = null;
-		Conta poupanca = null;
+	protected void criarClienteComContas(Scanner ler) {
+		System.out.println("\n--------------------------- NOVO CLIENTE ----------------------------");
+		System.out.print("Digite o nome do cliente: ");
+		String nome = ler.nextLine();
 
-		System.out.println("===============================================================");
-		do {
-			System.out.println("---------------------------> MENU <----------------------------");
-			System.out.println("1- Nova conta\n2- Depósito\n3- Saque\n4- Transferência\n5- Extrato\n6- Sair");
-			System.out.print("Escolha uma opção: ");
+		if (!validarNome(nome)) {
+			System.out.println("Cliente não criado!");
+			line();
+			quebrarLinha();
+			return;
+		}
 
-			try {
-				opc = ler.nextInt();
-				ler.nextLine(); // limpar buffer
+		Cliente cliente = new Cliente();
+		cliente.setNome(nome);
 
-				switch (opc) {
-				case 1:
-					System.out.println("\n-------------------------> NOVA CONTA <------------------------");
-					System.out.print("Digite o nome: ");
-					String name = ler.next();
+		cliente.addConta(new ContaCorrente(cliente));
+		cliente.addConta(new ContaPoupanca(cliente));
 
-					client = new Cliente();
-					client.setNome(name);
+		banco.addCliente(cliente);
+		System.out.println("\nCliente e contas criados com sucesso!");
+		line();
+		quebrarLinha();
+	}
 
-					cc = new ContaCorrente(client);
-					poupanca = new ContaPoupanca(client);
-					System.out.println("Contas criadas com sucesso.");
-					line();
-					break;
+	protected Cliente selecionarClienteComAutoSelecao(Scanner ler) {
+		List<Cliente> clientes = banco.getClientes();
 
-				case 2:
-					System.out.println("\n--------------------------> DEPÓSITO <-------------------------");
-					if (!clienteValido(client)) {
-						break;
-					}
+		if (clientes.isEmpty()) {
+			System.out.println("\nNenhum cliente cadastrado!");
+			line();
+			quebrarLinha();
+			return null;
+		}
 
-					System.out.print("Digite o valor de Depósito: R$ ");
-					double dep = ler.nextDouble();
-					
-					System.out.print("Conta para Depósito: 1- Conta Corrente; 2- Conta Poupança: ");
-					tipoConta = ler.nextInt();
+		if (clientes.size() == 1) {
+			return clientes.get(0);
+		}
 
-					if (tipoConta == 1) {
-						cc.depositar(dep);
-					} else if (tipoConta == 2) {
-						poupanca.depositar(dep);
-					} else {
-						System.out.println("Opção inválida");
-					}
-					break;					
+		listarClientes();
+		System.out.print("Digite o número do cliente: ");
+		int idx = ler.nextInt();
+		ler.nextLine();
 
-				case 3:
-					System.out.println("\n---------------------------> SAQUE <---------------------------");
-					if (!clienteValido(client)) {
-						break;
-					}
+		if (idx < 1 || idx > clientes.size()) {
+			System.out.println("\nCliente inválido!");
+			line();
+			quebrarLinha();
+			return null;
+		}
 
-					System.out.print("Digite o valor do saque: R$ ");
-					double saq = ler.nextDouble();
+		return clientes.get(idx - 1);
+	}
 
-					System.out.print("Conta para Saque: 1- Conta Corrente; 2- Conta Poupança: ");
-					tipoConta = ler.nextInt();
+	protected Conta selecionarContaPorTipo(Scanner ler, Cliente cliente) {
+		System.out.print("Escolha a conta: 1- Conta Corrente; 2- Conta Poupança: ");
+		int tipo = ler.nextInt();
+		ler.nextLine();
 
-					if (tipoConta == 1) {
-						cc.sacar(saq);
-					} else if (tipoConta == 2) {
-						poupanca.sacar(saq);
-					} else {
-						System.out.println("Opção inválida");
-					}
-					break;
+		for (Conta conta : cliente.getContas()) {
+			if ((tipo == 1 && conta instanceof ContaCorrente) || (tipo == 2 && conta instanceof ContaPoupanca)) {
+				return conta;
+			}
+		}
 
-				case 4:
-					System.out.println("\n-----------------------> TRANSFERÊNCIA <-----------------------");
-					if (!clienteValido(client)) {
-						break;
-					}
+		System.out.println("\nConta não encontrada!");
+		line();
+		quebrarLinha();
+		return null;
+	}
 
-					System.out.print("Digite o valor da transferencia: R$ ");
-					double transf = ler.nextDouble();
-					
-					System.out.print("Conta de Transferência: 1- Conta Corrente; 2- Conta Poupança: ");
-					tipoConta = ler.nextInt();
+	protected void depositar(Scanner ler) {
+		List<Cliente> clientes = banco.getClientes();
 
-					if (tipoConta == 1) {
-						cc.transferir(transf, poupanca);
-					} else if (tipoConta == 2) {
-						poupanca.transferir(transf, cc);
-					} else {
-						System.out.println("Opção inválida");
-					}
-					break;
+		System.out.println("\n----------------------------- DEPÓSITO ------------------------------");
+		if (clientes.isEmpty() || clientes.size() > 1) {
+			System.out.println("Escolha abaixo o Cliente:");
+		}
 
-				case 5:
-					System.out.println("\n--------------------------> EXTRATO <--------------------------");
-					if (!clienteValido(client)) {
-						break;
-					}
+		Cliente cliente = selecionarClienteComAutoSelecao(ler);
+		if (cliente == null)
+			return;
 
-					System.out.print("Tipo de Extrato: 1- Conta Corrente; 2- Poupanca; 3- Completo: ");
-					int tipoExtrato = ler.nextInt();
+		Conta conta = selecionarContaPorTipo(ler, cliente);
+		if (conta == null)
+			return;
 
-					if (tipoExtrato == 1) {
-						cc.imprimirExtrato();
-						line();
-					} else if (tipoExtrato == 2) {
-						poupanca.imprimirExtrato();
-						line();
-					} else if (tipoExtrato == 3) {
-						cc.imprimirExtrato();
-						poupanca.imprimirExtrato();
-						line();
-					} else {
-						System.out.println("Opção inválida");
-						line();
-					}
-					break;
+		System.out.print("Digite o valor: R$ ");
+		double valor = ler.nextDouble();
+		ler.nextLine();
 
-				case 6:
-					System.out.println("\n---------------------------> SAIR <----------------------------");
-					System.out.println("Saindo do sistema...");
-					System.out.println("");
-					Thread.sleep(2000);
-					System.out.println("Sistema finalizado.");
-					System.out.println("===============================================================");
-					break;
+		if (valor <= 0) {
+			System.out.println("\nValor inválido!");
+			line();
+			quebrarLinha();
+			return;
+		}
 
-				default:
-					System.out.println("Opção inválida.");
-				}
+		conta.depositar(valor);
+		quebrarLinha();
+	}
 
-			} catch (
+	protected void sacar(Scanner ler) {
+		List<Cliente> clientes = banco.getClientes();
 
-			InputMismatchException e) {
-				System.out.println("Erro: entrada inválida. Digite apenas números.");
-				ler.nextLine(); // limpar buffer
-			} catch (InterruptedException e) {
-				System.out.println("Pausa interrompida.");
+		System.out.println("\n------------------------------- SAQUE -------------------------------");
+		if (clientes.isEmpty() || clientes.size() > 1) {
+			System.out.println("Escolha abaixo o Cliente:");
+		}
+
+		Cliente cliente = selecionarClienteComAutoSelecao(ler);
+		if (cliente == null)
+			return;
+
+		Conta conta = selecionarContaPorTipo(ler, cliente);
+		if (conta == null)
+			return;
+
+		System.out.print("Digite o valor: R$ ");
+		double valor = ler.nextDouble();
+		ler.nextLine();
+
+		if (valor <= 0) {
+			System.out.println("\nValor inválido!");
+			line();
+			return;
+		}
+
+		conta.sacar(valor);
+		quebrarLinha();
+	}
+
+	protected void transferir(Scanner ler) {
+		List<Cliente> clientes = banco.getClientes();
+
+		System.out.println("\n--------------------------- TRANSFERÊNCIA ---------------------------");
+		if (clientes.isEmpty() || clientes.size() > 1) {
+			System.out.println("Escolha abaixo o Cliente:");
+		}
+
+		Cliente origem = selecionarClienteComAutoSelecao(ler);
+		if (origem == null)
+			return;
+
+		Conta contaOrigem = selecionarContaPorTipo(ler, origem);
+		if (contaOrigem == null)
+			return;
+
+		System.out.print("Valor da transferência: R$ ");
+		double valor = ler.nextDouble();
+		ler.nextLine();
+
+		if (valor <= 0) {
+			System.out.println("\nValor inválido!");
+			line();
+			return;
+		}
+
+		Conta contaDestino;
+		if (clientes.size() == 1) {
+			// Seleção automática de conta destino
+			if (contaOrigem instanceof ContaCorrente) {
+				contaDestino = origem.getContas().stream().filter(c -> c instanceof ContaPoupanca).findFirst()
+						.orElse(null);
+			} else {
+				contaDestino = origem.getContas().stream().filter(c -> c instanceof ContaCorrente).findFirst()
+						.orElse(null);
 			}
 
-			System.out.println("");
+			if (contaDestino == null) {
+				System.out.println("\nConta destino não encontrada!");
+				line();
+				return;
+			}
 
-		} while (opc != 6);
+		} else {
+			System.out.println("\nEscolha abaixo o Cliente de destino:");
+			Cliente destino = selecionarClienteComAutoSelecao(ler);
+			if (destino == null)
+				return;
 
-		ler.close();
+			if (destino.equals(origem)) {
+				// Mesmo cliente: selecionar conta destino automaticamente
+				contaDestino = getOutraConta(origem, contaOrigem);
+
+				if (contaDestino == null) {
+					System.out.println("\nConta destino não encontrada!");
+					line();
+					return;
+				}
+			} else {
+				// Clientes diferentes: selecionar conta normalmente
+
+				contaDestino = selecionarContaPorTipo(ler, destino);
+				if (contaDestino == null)
+					return;
+			}
+		}
+
+		contaOrigem.transferir(valor, contaDestino);
+		quebrarLinha();
 	}
 
-	private boolean clienteValido(Cliente client) {
-		if (client == null || client.getNome() == null || client.getNome().isBlank()) {
-			System.out.println("Crie uma conta primeiro!");
+	protected Conta getOutraConta(Cliente cliente, Conta contaOrigem) {
+		for (Conta conta : cliente.getContas()) {
+			if (!conta.equals(contaOrigem)) {
+				return conta;
+			}
+		}
+		return null;
+	}
+
+	protected void imprimirExtrato(Scanner ler) {
+		List<Cliente> clientes = banco.getClientes();
+
+		System.out.println("\n------------------------------ EXTRATO ------------------------------");
+		if (clientes.isEmpty() || clientes.size() > 1) {
+			System.out.println("Escolha abaixo o Cliente:");
+		}
+
+		Cliente cliente = selecionarClienteComAutoSelecao(ler);
+		if (cliente == null)
+			return;
+
+		System.out.print("Tipo de extrato: 1- Conta Corrente; 2- Conta Poupança; 3- Completo: ");
+		int tipo = ler.nextInt();
+		ler.nextLine();
+
+		switch (tipo) {
+		case 1:
+			imprimirExtratoPorTipo(cliente, ContaCorrente.class);
+			break;
+		case 2:
+			imprimirExtratoPorTipo(cliente, ContaPoupanca.class);
+			break;
+		case 3:
+			for (Conta c : cliente.getContas()) {
+				c.imprimirExtrato();
+			}
+			break;
+		default:
+			opcaoInvalida();
+		}
+
+		line();
+		quebrarLinha();
+	}
+
+	protected void imprimirExtratoPorTipo(Cliente cliente, Class<?> tipoConta) {
+		for (Conta c : cliente.getContas()) {
+			if (tipoConta.isInstance(c)) {
+				c.imprimirExtrato();
+				return;
+			}
+		}
+		System.out.println("\nConta não encontrada!");
+		line();
+
+	}
+
+	protected void listarClientes() {
+		System.out.println("\n------------------------- TODOS OS CLIENTES -------------------------");
+		List<Cliente> clientes = banco.getClientes();
+		for (int i = 0; i < clientes.size(); i++) {
+			System.out.printf("%d - %s%n", i + 1, clientes.get(i).getNome());
+		}
+		line();
+	}
+
+	protected void sairDoSistema() {
+		try {
+			System.out.println("\n------------------------------- SAIR --------------------------------");
+			System.out.println("Saindo do sistema...");
+			Thread.sleep(1000);
+			System.out.println("\nSistema finalizado!");
+			doubleLine();
+		} catch (InterruptedException e) {
+			System.out.println("Pausa interrompida.");
+		}
+	}
+
+	// Métodos adicionais
+	private void line() {
+		System.out.println("---------------------------------------------------------------------");
+	}
+
+	private void doubleLine() {
+		System.out.println("=====================================================================");
+	}
+
+	private void quebrarLinha() {
+		System.out.println("");
+	}
+
+	public void opcaoInvalida() {
+		System.out.println("\nOpção inválida!");
+		line();
+	}
+
+	public boolean validarNome(String nome) {
+		if (nome == null || nome.isBlank()) {
+			System.out.println("\nO nome não pode estar em branco!");
 			return false;
 		}
+
+		if (!nome.matches("[a-zA-ZáéíóúãõâêîôûçÁÉÍÓÚÃÕÂÊÎÔÛÇ ]+")) {
+			System.out.println("\nApenas letras e espaços são permitidos!");
+			return false;
+		}
+
 		return true;
 	}
-
-	private void line() {
-		System.out.println("---------------------------------------------------------------");
-	}
-
 }
