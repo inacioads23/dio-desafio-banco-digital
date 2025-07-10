@@ -42,6 +42,8 @@ public abstract class Conta implements IConta {
 		} else {
 			saldo = saldo - valor;
 			// saldo -= valor // outra opção
+			System.out.println("\nSaque realizado com sucesso!");
+			line();
 		}
 	}
 
@@ -53,6 +55,8 @@ public abstract class Conta implements IConta {
 		} else {
 			saldo = saldo + valor;
 			// saldo += valor // outra opção
+			System.out.println("\nDepósito realizado com sucesso!");
+			line();
 		}
 	}
 
@@ -67,6 +71,8 @@ public abstract class Conta implements IConta {
 		} else {
 			this.sacar(valor); // sacar da conta atual ('this')
 			contaDestino.depositar(valor);
+			System.out.println("\nTransferência realizada com sucesso!");
+			line();
 		}
 	}
 
@@ -75,10 +81,10 @@ public abstract class Conta implements IConta {
 		System.out.println(String.format("Titular: %s", this.cliente.getNome()));
 		System.out.println(String.format("Agencia: %d", this.agencia));
 		System.out.println(String.format("Numero Conta: %d", this.numero));
-		System.out.println(String.format("Saldo: R$ %.2f%n", this.saldo));
+		System.out.println(String.format("Saldo: R$ %.2f", this.saldo));
 	}
 
 	private void line() {
-		System.out.println("---------------------------------------------------------------");
+		System.out.println("---------------------------------------------------------------------");
 	}
 }

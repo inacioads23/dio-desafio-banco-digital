@@ -1,19 +1,36 @@
+import java.util.ArrayList;
+import java.util.List;
 
 public class Cliente {
-	
-	private String nome;
 
-	public String getNome() {
-		return nome;
-	}
+    private String nome;
+    private List<Conta> contas;
 
-	public void setNome(String nome) {
-        if (!nome.matches("[a-zA-ZáéíóúãõâêîôûçÁÉÍÓÚÃÕÂÊÎÔÛÇ ]+")) {
-            System.out.println("Nome inválido. Apenas letras são permitidas.");
-            this.nome = "";
-        } else {
-            this.nome = nome;
-        }
+    // Construtor
+    public Cliente() {
+        this.contas = new ArrayList<>();
     }
 
+    public String getNome() {
+        return nome;
+    }    
+
+    public void setNome(String nome) {
+		this.nome = nome;
+	}
+
+	public List<Conta> getContas() {
+        return contas;
+    }
+
+    public void setContas(List<Conta> contas) {
+        this.contas = contas;
+    }
+
+    // Novo método para adicionar conta
+    public void addConta(Conta conta) {
+        this.contas.add(conta);
+    }
+    
+    
 }
