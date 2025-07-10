@@ -5,11 +5,11 @@
 public interface IConta {
 
 	// Métodos
-	void sacar(double valor); // assinatura de método que as classes terão que respeitar
+	boolean sacar(double valor); // assinatura de método que as classes terão que respeitar
 	
-	void depositar(double valor);
+	boolean depositar(double valor);
 	
-	void transferir(double valor, Conta contaDestino);
+	boolean transferir(double valor, Conta contaDestino);
 	
-	void imprimirExtrato(); // implementado nas contas individuais, pois eu havia transformado a Class Conta em abstract	
+	void imprimirSaldo(); // implementado nas contas individuais, pois eu havia transformado a Class Conta em abstract	
 }

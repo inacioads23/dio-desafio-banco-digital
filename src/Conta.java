@@ -2,6 +2,7 @@
 
 public abstract class Conta implements IConta {
 
+	private MenuPrincipal menu = new MenuPrincipal();
 	private static int SEQUENCIAL = 1;
 	private static final int AGENCIA_PADAO = 1;
 
@@ -32,59 +33,65 @@ public abstract class Conta implements IConta {
 
 	// Métodos que vem da interface IConta
 	@Override
-	public void sacar(double valor) {
+	public boolean sacar(double valor) {
 		if (saldo <= 0) {
 			System.out.println("\nSem saldo disponível para saque");
-			line();
+			menu.line();
+			return false;
 		} else if (saldo < valor) {
 			System.out.println("\nValor solicitado acima do saldo em conta");
-			line();
+			menu.line();
+			return false;
 		} else {
 			saldo = saldo - valor;
 			// saldo -= valor // outra opção
-			System.out.println("\nSaque realizado com sucesso!");
-			line();
+			return true;
 		}
 	}
 
 	@Override
-	public void depositar(double valor) {
+	public boolean depositar(double valor) {
 		if (cliente.getNome().isEmpty()) {
 			System.out.println("\nConta não existe! Primeiro crie a conta!");
-			line();
-		} else {
+			menu.line();
+			return false;
+		} else if(valor <= 0){
+			System.out.println("\nValor de Depósito inválido");
+			menu.line();
+			return false;
+		}else {
 			saldo = saldo + valor;
 			// saldo += valor // outra opção
-			System.out.println("\nDepósito realizado com sucesso!");
-			line();
+			return true;
 		}
 	}
 
 	@Override
-	public void transferir(double valor, Conta contaDestino) {
+	public boolean transferir(double valor, Conta contaDestino) {
 		if (saldo <= 0) {
 			System.out.println("\nSem saldo disponível para transferência");
-			line();
+			menu.line();
+			return false;
 		} else if (saldo < valor) {
 			System.out.println("\nValor solicitado acima do saldo em conta");
-			line();
+			menu.line();
+			return false;
 		} else {
 			this.sacar(valor); // sacar da conta atual ('this')
 			contaDestino.depositar(valor);
-			System.out.println("\nTransferência realizada com sucesso!");
-			line();
-		}
+			return true;	
+		}		
 	}
 
 	// Método adicional
-	protected void imprimirInfoComum() {
-		System.out.println(String.format("Titular: %s", this.cliente.getNome()));
-		System.out.println(String.format("Agencia: %d", this.agencia));
+	protected void imprimirCabecalhoSaldo() {		
+		menu.quebrarLinha();
+		menu.line();
+		System.out.printf("Titular: %s    Agência: %d%n", cliente.getNome(), agencia);
+	}
+	
+	protected void imprimirInfoComum() {		
 		System.out.println(String.format("Numero Conta: %d", this.numero));
 		System.out.println(String.format("Saldo: R$ %.2f", this.saldo));
-	}
-
-	private void line() {
-		System.out.println("---------------------------------------------------------------------");
 	}
 }

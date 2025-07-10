@@ -3,17 +3,18 @@ import java.util.Scanner;
 
 public class MenuOpcoes {
 
+	private MenuPrincipal menu = new MenuPrincipal();
 	private Banco banco = new Banco("Banco Teste");
 
 	protected void criarClienteComContas(Scanner ler) {
-		System.out.println("\n--------------------------- NOVO CLIENTE ----------------------------");
+		System.out.println("\n---------------------------- NOVO CLIENTE ----------------------------");
 		System.out.print("Digite o nome do cliente: ");
 		String nome = ler.nextLine();
 
 		if (!validarNome(nome)) {
 			System.out.println("Cliente não criado!");
-			line();
-			quebrarLinha();
+			menu.line();
+			menu.quebrarLinha();
 			return;
 		}
 
@@ -25,8 +26,8 @@ public class MenuOpcoes {
 
 		banco.addCliente(cliente);
 		System.out.println("\nCliente e contas criados com sucesso!");
-		line();
-		quebrarLinha();
+		menu.line();
+		menu.quebrarLinha();
 	}
 
 	protected Cliente selecionarClienteComAutoSelecao(Scanner ler) {
@@ -34,8 +35,8 @@ public class MenuOpcoes {
 
 		if (clientes.isEmpty()) {
 			System.out.println("\nNenhum cliente cadastrado!");
-			line();
-			quebrarLinha();
+			menu.line();
+			menu.quebrarLinha();
 			return null;
 		}
 
@@ -50,16 +51,16 @@ public class MenuOpcoes {
 
 		if (idx < 1 || idx > clientes.size()) {
 			System.out.println("\nCliente inválido!");
-			line();
-			quebrarLinha();
+			menu.line();
+			menu.quebrarLinha();
 			return null;
 		}
 
 		return clientes.get(idx - 1);
 	}
 
-	protected Conta selecionarContaPorTipo(Scanner ler, Cliente cliente) {
-		System.out.print("Escolha a conta: 1- Conta Corrente; 2- Conta Poupança: ");
+	protected Conta selecionarContaPorTipo(Scanner ler, Cliente cliente, String mensagem) {
+		System.out.print(mensagem);
 		int tipo = ler.nextInt();
 		ler.nextLine();
 
@@ -70,26 +71,22 @@ public class MenuOpcoes {
 		}
 
 		System.out.println("\nConta não encontrada!");
-		line();
-		quebrarLinha();
+		menu.line();
+		menu.quebrarLinha();
 		return null;
 	}
 
-	protected void depositar(Scanner ler) {
-		List<Cliente> clientes = banco.getClientes();
-
-		System.out.println("\n----------------------------- DEPÓSITO ------------------------------");
-		if (clientes.isEmpty() || clientes.size() > 1) {
-			System.out.println("Escolha abaixo o Cliente:");
-		}
+	protected boolean depositar(Scanner ler) {
+		System.out.println("\n------------------------------ DEPÓSITO ------------------------------");
 
 		Cliente cliente = selecionarClienteComAutoSelecao(ler);
 		if (cliente == null)
-			return;
+			return false;
 
-		Conta conta = selecionarContaPorTipo(ler, cliente);
+		Conta conta = selecionarContaPorTipo(ler, cliente,
+				"Escolha a conta para DEPÓSITO: 1- Conta Corrente; 2- Conta Poupança: ");
 		if (conta == null)
-			return;
+			return false;
 
 		System.out.print("Digite o valor: R$ ");
 		double valor = ler.nextDouble();
@@ -97,30 +94,27 @@ public class MenuOpcoes {
 
 		if (valor <= 0) {
 			System.out.println("\nValor inválido!");
-			line();
-			quebrarLinha();
-			return;
+			menu.line();
+			menu.quebrarLinha();
+			return false;
 		}
 
 		conta.depositar(valor);
-		quebrarLinha();
+		menu.quebrarLinha();
+		return true;
 	}
 
-	protected void sacar(Scanner ler) {
-		List<Cliente> clientes = banco.getClientes();
-
-		System.out.println("\n------------------------------- SAQUE -------------------------------");
-		if (clientes.isEmpty() || clientes.size() > 1) {
-			System.out.println("Escolha abaixo o Cliente:");
-		}
+	protected boolean sacar(Scanner ler) {
+		System.out.println("\n------------------------------- SAQUE --------------------------------");
 
 		Cliente cliente = selecionarClienteComAutoSelecao(ler);
 		if (cliente == null)
-			return;
+			return false;
 
-		Conta conta = selecionarContaPorTipo(ler, cliente);
+		Conta conta = selecionarContaPorTipo(ler, cliente,
+				"Escolha a conta para DÉBITO: 1- Conta Corrente; 2- Conta Poupança: ");
 		if (conta == null)
-			return;
+			return false;
 
 		System.out.print("Digite o valor: R$ ");
 		double valor = ler.nextDouble();
@@ -128,29 +122,29 @@ public class MenuOpcoes {
 
 		if (valor <= 0) {
 			System.out.println("\nValor inválido!");
-			line();
-			return;
+			menu.line();
+			menu.quebrarLinha();
+			return false;
 		}
 
-		conta.sacar(valor);
-		quebrarLinha();
+		boolean sucesso = conta.sacar(valor);
+		menu.quebrarLinha();
+		return sucesso;
 	}
 
-	protected void transferir(Scanner ler) {
+	protected boolean transferir(Scanner ler) {
 		List<Cliente> clientes = banco.getClientes();
 
-		System.out.println("\n--------------------------- TRANSFERÊNCIA ---------------------------");
-		if (clientes.isEmpty() || clientes.size() > 1) {
-			System.out.println("Escolha abaixo o Cliente:");
-		}
+		System.out.println("\n--------------------------- TRANSFERÊNCIA ----------------------------");
 
 		Cliente origem = selecionarClienteComAutoSelecao(ler);
 		if (origem == null)
-			return;
+			return false;
 
-		Conta contaOrigem = selecionarContaPorTipo(ler, origem);
+		Conta contaOrigem = selecionarContaPorTipo(ler, origem,
+				"Escolha a conta para DÉBITO: 1- Conta Corrente; 2- Conta Poupança: ");
 		if (contaOrigem == null)
-			return;
+			return false;
 
 		System.out.print("Valor da transferência: R$ ");
 		double valor = ler.nextDouble();
@@ -158,13 +152,13 @@ public class MenuOpcoes {
 
 		if (valor <= 0) {
 			System.out.println("\nValor inválido!");
-			line();
-			return;
+			menu.line();
+			return false;
 		}
 
 		Conta contaDestino;
+
 		if (clientes.size() == 1) {
-			// Seleção automática de conta destino
 			if (contaOrigem instanceof ContaCorrente) {
 				contaDestino = origem.getContas().stream().filter(c -> c instanceof ContaPoupanca).findFirst()
 						.orElse(null);
@@ -175,36 +169,33 @@ public class MenuOpcoes {
 
 			if (contaDestino == null) {
 				System.out.println("\nConta destino não encontrada!");
-				line();
-				return;
+				menu.line();
+				return false;
 			}
-
 		} else {
 			System.out.println("\nEscolha abaixo o Cliente de destino:");
 			Cliente destino = selecionarClienteComAutoSelecao(ler);
 			if (destino == null)
-				return;
+				return false;
 
 			if (destino.equals(origem)) {
-				// Mesmo cliente: selecionar conta destino automaticamente
 				contaDestino = getOutraConta(origem, contaOrigem);
-
 				if (contaDestino == null) {
 					System.out.println("\nConta destino não encontrada!");
-					line();
-					return;
+					menu.line();
+					return false;
 				}
 			} else {
-				// Clientes diferentes: selecionar conta normalmente
-
-				contaDestino = selecionarContaPorTipo(ler, destino);
+				contaDestino = selecionarContaPorTipo(ler, destino,
+						"Escolha a conta para CRÉDITO: 1- Conta Corrente; 2- Conta Poupança: ");
 				if (contaDestino == null)
-					return;
+					return false;
 			}
 		}
 
-		contaOrigem.transferir(valor, contaDestino);
-		quebrarLinha();
+		boolean sucesso = contaOrigem.transferir(valor, contaDestino);
+		menu.quebrarLinha();
+		return sucesso;
 	}
 
 	protected Conta getOutraConta(Cliente cliente, Conta contaOrigem) {
@@ -216,91 +207,98 @@ public class MenuOpcoes {
 		return null;
 	}
 
-	protected void imprimirExtrato(Scanner ler) {
-		List<Cliente> clientes = banco.getClientes();
-
-		System.out.println("\n------------------------------ EXTRATO ------------------------------");
-		if (clientes.isEmpty() || clientes.size() > 1) {
-			System.out.println("Escolha abaixo o Cliente:");
-		}
+	protected void imprimirSaldo(Scanner ler) {
+		System.out.println("\n------------------------------- SALDO --------------------------------");
 
 		Cliente cliente = selecionarClienteComAutoSelecao(ler);
 		if (cliente == null)
 			return;
 
-		System.out.print("Tipo de extrato: 1- Conta Corrente; 2- Conta Poupança; 3- Completo: ");
+		System.out.print("Tipo de saldo: 1- Conta Corrente; 2- Conta Poupança; 3- Total: ");
 		int tipo = ler.nextInt();
 		ler.nextLine();
 
 		switch (tipo) {
 		case 1:
-			imprimirExtratoPorTipo(cliente, ContaCorrente.class);
+			Conta contaCC = getContaPorTipo(cliente, ContaCorrente.class);
+			contaCC.imprimirCabecalhoSaldo();
+			contaCC.imprimirSaldo();
 			break;
 		case 2:
-			imprimirExtratoPorTipo(cliente, ContaPoupanca.class);
+			Conta contaCP = getContaPorTipo(cliente, ContaPoupanca.class);
+			contaCP.imprimirCabecalhoSaldo();
+			contaCP.imprimirSaldo();
 			break;
 		case 3:
+			cliente.getContas().get(0).imprimirCabecalhoSaldo();
+			double saldoTotal = 0.0;
+
 			for (Conta c : cliente.getContas()) {
-				c.imprimirExtrato();
+				c.imprimirSaldo();
+				saldoTotal += c.getSaldo(); // Assumindo que você tem um método getSaldo()
 			}
+
+			System.out.printf("\nSALDO TOTAL (Todas as contas): R$ %.2f%n", saldoTotal);
 			break;
 		default:
 			opcaoInvalida();
 		}
 
-		line();
-		quebrarLinha();
+		menu.line();
+		menu.quebrarLinha();
 	}
 
 	protected void imprimirExtratoPorTipo(Cliente cliente, Class<?> tipoConta) {
 		for (Conta c : cliente.getContas()) {
 			if (tipoConta.isInstance(c)) {
-				c.imprimirExtrato();
+				c.imprimirSaldo();
 				return;
 			}
 		}
 		System.out.println("\nConta não encontrada!");
-		line();
-
+		menu.line();
 	}
 
 	protected void listarClientes() {
-		System.out.println("\n------------------------- TODOS OS CLIENTES -------------------------");
+		System.out.println("\n------------------------- TODOS OS CLIENTES --------------------------");
 		List<Cliente> clientes = banco.getClientes();
-		for (int i = 0; i < clientes.size(); i++) {
-			System.out.printf("%d - %s%n", i + 1, clientes.get(i).getNome());
+
+		if (clientes.isEmpty()) {
+			System.out.println("\nNenhum cliente cadastrado!");
+			menu.line();
+		} else {
+			for (int i = 0; i < clientes.size(); i++) {
+				System.out.printf("%d- %s%n", i + 1, clientes.get(i).getNome());
+			}
+			menu.line();
 		}
-		line();
 	}
 
 	protected void sairDoSistema() {
 		try {
-			System.out.println("\n------------------------------- SAIR --------------------------------");
+			System.out.println("\n-------------------------------- SAIR --------------------------------");
 			System.out.println("Saindo do sistema...");
 			Thread.sleep(1000);
 			System.out.println("\nSistema finalizado!");
-			doubleLine();
+			menu.doubleLine();
 		} catch (InterruptedException e) {
 			System.out.println("Pausa interrompida.");
 		}
 	}
 
+	private Conta getContaPorTipo(Cliente cliente, Class<?> tipoConta) {
+		for (Conta c : cliente.getContas()) {
+			if (tipoConta.isInstance(c)) {
+				return c;
+			}
+		}
+		return null;
+	}
+
 	// Métodos adicionais
-	private void line() {
-		System.out.println("---------------------------------------------------------------------");
-	}
-
-	private void doubleLine() {
-		System.out.println("=====================================================================");
-	}
-
-	private void quebrarLinha() {
-		System.out.println("");
-	}
-
 	public void opcaoInvalida() {
 		System.out.println("\nOpção inválida!");
-		line();
+		menu.line();
 	}
 
 	public boolean validarNome(String nome) {
